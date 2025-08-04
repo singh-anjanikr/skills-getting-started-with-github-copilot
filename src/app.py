@@ -80,6 +80,13 @@ activities = {
     }
 }
 
+# Example student directory for richer participant info
+students = {
+    "michael@mergington.edu": {"name": "Michael Smith"},
+    "daniel@mergington.edu": {"name": "Daniel Lee"},
+    # ...add all student emails and names here...
+}
+
 
 @app.get("/")
 def root():
@@ -88,7 +95,21 @@ def root():
 
 @app.get("/activities")
 def get_activities():
-    return activities
+    # Return activities with participant details (email and name)
+    activities_with_participants = {}
+    for name, details in activities.items():
+        participants = [
+            {
+                "email": email,
+                "name": students.get(email, {}).get("name", email)
+            }
+            for email in details.get("participants", [])
+        ]
+        activities_with_participants[name] = {
+            **details,
+            "participants": participants
+        }
+    return activities_with_participants
 
 
 @app.post("/activities/{activity_name}/signup")
